@@ -23,6 +23,10 @@ body {
   background: var(--paper);
 }
 
+body.locked {
+  overflow: hidden;
+}
+
 button,
 input,
 select {
@@ -37,6 +41,45 @@ button {
   display: grid;
   grid-template-columns: 288px minmax(0, 1fr);
   min-height: 100vh;
+}
+
+.app-shell.is-locked {
+  filter: blur(3px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.login-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    linear-gradient(rgba(19, 34, 56, 0.86), rgba(19, 34, 56, 0.86)),
+    radial-gradient(circle at 20% 20%, rgba(23, 105, 170, 0.46), transparent 34%),
+    #132238;
+}
+
+.login-screen.hidden {
+  display: none;
+}
+
+.login-card {
+  width: min(460px, 100%);
+  display: grid;
+  gap: 18px;
+  padding: 26px;
+  border: 1px solid rgba(216, 224, 234, 0.75);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+}
+
+.login-brand {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
 }
 
 .sidebar {
@@ -107,6 +150,20 @@ button {
   border-radius: 8px;
   padding: 14px;
   background: rgba(255, 255, 255, 0.07);
+}
+
+.user-panel {
+  margin-top: 0;
+}
+
+.logout-btn {
+  width: 100%;
+  min-height: 36px;
+  margin-top: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
 
 .panel-label,

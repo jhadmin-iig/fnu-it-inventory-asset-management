@@ -7,7 +7,31 @@
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
-    <div class="app-shell">
+    <section id="loginScreen" class="login-screen">
+      <form id="loginForm" class="login-card">
+        <div class="brand login-brand">
+          <div class="brand-mark">FNU</div>
+          <div>
+            <strong>Admin Login</strong>
+            <span>Division of IT Services Inventory</span>
+          </div>
+        </div>
+        <div>
+          <p class="eyebrow">Restricted access</p>
+          <h1>Inventory and Asset Management System</h1>
+        </div>
+        <label>Username
+          <input name="username" autocomplete="username" value="admin" required>
+        </label>
+        <label>Password
+          <input name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <button class="primary-btn" type="submit">Sign In</button>
+        <p class="help-text">Demo admin credentials: <strong>admin</strong> / <strong>FNU@2026</strong></p>
+      </form>
+    </section>
+
+    <div id="appShell" class="app-shell is-locked">
       <aside class="sidebar">
         <div class="brand">
           <div class="brand-mark">FNU</div>
@@ -34,6 +58,13 @@
           <span class="panel-label">System Scope</span>
           <strong>18 FNU campuses</strong>
           <small>Fixed assets, non-fixed serialised equipment, consumables, licences, stores, audits, transfers, disposal, and integrations.</small>
+        </div>
+
+        <div class="sidebar-panel user-panel">
+          <span class="panel-label">Signed In</span>
+          <strong id="signedInUser">Admin</strong>
+          <small>System Administrator</small>
+          <button id="logoutBtn" class="logout-btn">Logout</button>
         </div>
       </aside>
 

@@ -1,4 +1,10 @@
 const STORE_KEY = "fnuItamSystemV1";
+const AUTH_KEY = "fnuItamAdminSession";
+const ADMIN_USER = {
+  username: "admin",
+  password: "FNU@2026",
+  name: "FNU IT Administrator"
+};
 
 const campuses = [
   "Nasinu", "Samabula", "Labasa", "Lautoka", "Natabua", "Namaka", "Ba", "Nadi", "Koronivia",
@@ -56,6 +62,7 @@ let db = loadDb();
 let activePage = "dashboard";
 let activeAssetFilter = "All";
 let selectedAssetId = db.assets[0]?.id || "";
+let currentUser = loadSession();
 
 function asset(tag, name, category, serial, campus, building, room, department, custodian, status, condition, supplier, po, cost, warrantyEnd, replacementDue, lastVerified) {
   return {
@@ -97,6 +104,16 @@ function loadDb() {
   return saved ? JSON.parse(saved) : structuredClone(seed);
 }
 
+function loadSession() {
+  const saved = sessionStorage.getItem(AUTH_KEY);
+  return saved ? JSON.parse(saved) : null;
+}
+
+function saveSession(user) {
+  currentUser = user;
+  sessionStorage.setItem(AUTH_KEY, JSON.stringify(user));
+}
+
 function saveDb(message) {
   if (message) {
     db.systemLog.unshift({ id: uid(), date: new Date().toLocaleString(), message });
@@ -123,6 +140,7 @@ function showToast(message) {
 }
 
 function setPage(page) {
+  if (!currentUser) return;
   activePage = page;
   $all("[data-page-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.pagePanel === page));
   $all("[data-page]").forEach((button) => button.classList.toggle("active", button.dataset.page === page));
@@ -364,6 +382,9 @@ function syncAssetSelects() {
 }
 
 function bindEvents() {
+  $("#loginForm").addEventListener("submit", handleLogin);
+  $("#logoutBtn").addEventListener("click", handleLogout);
+
   $all("[data-page]").forEach((button) => button.addEventListener("click", () => setPage(button.dataset.page)));
   $all("[data-page-jump]").forEach((button) => button.addEventListener("click", () => setPage(button.dataset.pageJump)));
 
@@ -428,6 +449,45 @@ function bindEvents() {
   $("#disposalForm").addEventListener("submit", addDisposal);
   $("#auditForm").addEventListener("submit", addAudit);
   $("#licenceForm").addEventListener("submit", addLicence);
+}
+
+function handleLogin(event) {
+  event.preventDefault();
+  const data = Object.fromEntries(new FormData(event.target));
+  const usernameOk = data.username.trim().toLowerCase() === ADMIN_USER.username;
+  const passwordOk = data.password === ADMIN_USER.password;
+  if (!usernameOk || !passwordOk) {
+    showToast("Invalid admin username or password.");
+    return;
+  }
+  saveSession({ username: ADMIN_USER.username, name: ADMIN_USER.name, role: "System Administrator", signedInAt: new Date().toISOString() });
+  db.systemLog.unshift({ id: uid(), date: new Date().toLocaleString(), message: `${ADMIN_USER.name} signed in` });
+  localStorage.setItem(STORE_KEY, JSON.stringify(db));
+  applyAuthState();
+  renderAll();
+  setPage((window.location.hash || "#dashboard").replace("#", ""));
+  showToast("Signed in as administrator.");
+}
+
+function handleLogout() {
+  db.systemLog.unshift({ id: uid(), date: new Date().toLocaleString(), message: `${currentUser?.name || "Admin"} signed out` });
+  localStorage.setItem(STORE_KEY, JSON.stringify(db));
+  sessionStorage.removeItem(AUTH_KEY);
+  currentUser = null;
+  applyAuthState();
+  showToast("Signed out.");
+}
+
+function applyAuthState() {
+  const signedIn = Boolean(currentUser);
+  $("#loginScreen").classList.toggle("hidden", signedIn);
+  $("#appShell").classList.toggle("is-locked", !signedIn);
+  $("#signedInUser").textContent = currentUser?.name || "Not signed in";
+  document.body.classList.toggle("locked", !signedIn);
+  if (!signedIn) {
+    $("#loginForm [name='password']").value = "";
+    $("#loginForm [name='username']").focus();
+  }
 }
 
 function handleAssetAction(action, id) {
@@ -656,5 +716,8 @@ function initialiseForms() {
 
 initialiseForms();
 bindEvents();
+applyAuthState();
 renderAll();
-setPage((window.location.hash || "#dashboard").replace("#", ""));
+if (currentUser) {
+  setPage((window.location.hash || "#dashboard").replace("#", ""));
+}
