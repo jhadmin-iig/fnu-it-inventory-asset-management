@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FNU IT Services Inventory and Asset Management System</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">FNU</div>
+          <div>
+            <strong>Division of IT Services</strong>
+            <span>Inventory and Asset Management</span>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="Main pages">
+          <button class="active" data-page="dashboard">Dashboard</button>
+          <button data-page="assets">Assets</button>
+          <button data-page="locations">Locations</button>
+          <button data-page="receiving">Receiving</button>
+          <button data-page="stores">Stores</button>
+          <button data-page="workflows">Workflows</button>
+          <button data-page="audit">Audit</button>
+          <button data-page="licences">Licences</button>
+          <button data-page="reports">Reports</button>
+          <button data-page="admin">Admin</button>
+        </nav>
+
+        <div class="sidebar-panel">
+          <span class="panel-label">System Scope</span>
+          <strong>18 FNU campuses</strong>
+          <small>Fixed assets, non-fixed serialised equipment, consumables, licences, stores, audits, transfers, disposal, and integrations.</small>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Centralised ITAM platform</p>
+            <h1 id="pageTitle">Dashboard</h1>
+          </div>
+          <div class="topbar-actions">
+            <button id="scanBtn" class="icon-btn" title="Scan or search QR/barcode">QR</button>
+            <button id="importBtn" class="secondary-btn">Import</button>
+            <button id="exportAllBtn" class="secondary-btn">Backup</button>
+            <button id="newAssetBtn" class="primary-btn">New Asset</button>
+            <input id="fileInput" type="file" accept=".csv,.json" hidden>
+          </div>
+        </header>
+
+        <section class="page active" data-page-panel="dashboard">
+          <div class="metrics-grid" id="metricsGrid"></div>
+          <div class="dashboard-grid">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Operational register</p>
+                  <h2>Recent Asset Activity</h2>
+                </div>
+                <button class="quiet-btn" data-page-jump="assets">Open Register</button>
+              </div>
+              <div class="activity-list" id="recentActivity"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Management view</p>
+                  <h2>Assets by Campus</h2>
+                </div>
+              </div>
+              <div class="bar-list" id="campusBars"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="page" data-page-panel="assets">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Single source of truth</p>
+                <h2>Asset Register</h2>
+              </div>
+              <div class="segmented" id="assetTypeTabs">
+                <button class="selected" data-filter="All">All</button>
+                <button data-filter="Fixed">Fixed</button>
+                <button data-filter="Non-fixed">Non-fixed</button>
+                <button data-filter="Software">Software</button>
+                <button data-filter="Consumable">Consumable</button>
+                <button data-filter="Serialised">Serialised</button>
+              </div>
+            </div>
+            <div class="filters">
+              <input id="searchInput" placeholder="Search tag, serial, device, custodian, room, PO, supplier">
+              <select id="campusFilter"></select>
+              <select id="statusFilter"></select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Asset</th>
+                    <th>Category</th>
+                    <th>Serial</th>
+                    <th>Location</th>
+                    <th>Custodian</th>
+                    <th>Status</th>
+                    <th>Condition</th>
+                    <th>Warranty</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="assetRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="workspace-grid">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Register or edit</p>
+                  <h2 id="assetFormTitle">Asset Capture</h2>
+                </div>
+                <button id="clearAssetFormBtn" class="quiet-btn">Clear</button>
+              </div>
+              <form id="assetForm" class="asset-form">
+                <input name="id" type="hidden">
+                <label>Asset tag <input name="tag" required></label>
+                <label>Serial number <input name="serial" required></label>
+                <label>Asset name <input name="name" required></label>
+                <label>Category
+                  <select name="category" required>
+                    <option>Fixed asset desktop</option>
+                    <option>Fixed asset network equipment</option>
+                    <option>Fixed asset teaching equipment</option>
+                    <option>Non-fixed serialised printer</option>
+                    <option>Non-fixed laptop or mobile kit</option>
+                    <option>Software licence</option>
+                    <option>Consumable or spare part</option>
+                  </select>
+                </label>
+                <label>Campus <select name="campus" required></select></label>
+                <label>Building <input name="building" required></label>
+                <label>Room / rack / desk <input name="room" required></label>
+                <label>Department <input name="department" required></label>
+                <label>Custodian / assigned to <input name="custodian" required></label>
+                <label>Status <select name="status" required></select></label>
+                <label>Condition
+                  <select name="condition" required>
+                    <option>New</option>
+                    <option>Good</option>
+                    <option>Fair</option>
+                    <option>Faulty</option>
+                    <option>Damaged</option>
+                    <option>Obsolete</option>
+                    <option>Compliant</option>
+                  </select>
+                </label>
+                <label>Supplier <input name="supplier" required></label>
+                <label>PO number <input name="po" required></label>
+                <label>Purchase cost <input name="cost" type="number" min="0" step="0.01" required></label>
+                <label>Warranty end <input name="warrantyEnd" type="date" required></label>
+                <label>Replacement due <input name="replacementDue" type="date" required></label>
+                <label>Last verified <input name="lastVerified" type="date" required></label>
+                <label class="wide">Notes <input name="notes"></label>
+                <button class="primary-btn wide" type="submit">Save Asset Record</button>
+              </form>
+            </article>
+
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Asset profile</p>
+                  <h2>Selected Record</h2>
+                </div>
+              </div>
+              <div id="assetProfile" class="profile-panel"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="page" data-page-panel="locations">
+          <div class="module-grid">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Location master</p>
+                  <h2>Campus, Building, Room, Lab, Store</h2>
+                </div>
+              </div>
+              <form id="locationForm" class="compact-form">
+                <input name="campus" placeholder="Campus" required>
+                <input name="building" placeholder="Building" required>
+                <input name="floor" placeholder="Floor" required>
+                <input name="room" placeholder="Room / lab / office" required>
+                <input name="type" placeholder="Type: Lab, Store, Office, Network Room" required>
+                <button class="primary-btn">Add Location</button>
+              </form>
+              <div id="locationList" class="records-list"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Hierarchy</p>
+                  <h2>University to Desk Model</h2>
+                </div>
+              </div>
+              <div class="campus-map">
+                <div class="map-node campus">FNU</div>
+                <div class="map-row"><div class="map-node building">Campus</div><div class="map-node building">Building</div><div class="map-node building">Floor</div></div>
+                <div class="map-row"><div class="map-node room">Room / Lab / Office</div><div class="map-node room">Rack / Shelf / Desk</div><div class="map-node room">Custodian</div></div>
+              </div>
+              <div id="locationSummary" class="summary-grid"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="page" data-page-panel="receiving">
+          <div class="module-grid">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Procurement to deployment</p>
+                  <h2>Receiving Register</h2>
+                </div>
+              </div>
+              <form id="receivingForm" class="compact-form">
+                <input name="po" placeholder="PO number" required>
+                <input name="supplier" placeholder="Supplier" required>
+                <input name="item" placeholder="Item description" required>
+                <input name="quantity" type="number" min="1" placeholder="Quantity" required>
+                <select name="status"><option>Received</option><option>Tagged</option><option>Configured</option><option>Allocated to Store</option></select>
+                <button class="primary-btn">Record Delivery</button>
+              </form>
+              <div id="receivingList" class="records-list"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Workflow</p>
+                  <h2>Receiving Steps</h2>
+                </div>
+              </div>
+              <div id="receivingSteps" class="stepper"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="page" data-page-panel="stores">
+          <div class="module-grid">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Stock control</p>
+                  <h2>Stores, Spares, and Consumables</h2>
+                </div>
+              </div>
+              <form id="stockForm" class="compact-form">
+                <input name="store" placeholder="Store" required>
+                <input name="item" placeholder="Item" required>
+                <input name="quantity" type="number" min="0" placeholder="Qty" required>
+                <input name="minimum" type="number" min="0" placeholder="Min" required>
+                <button class="primary-btn">Save Stock</button>
+              </form>
+              <div id="stockList" class="stock-list"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Issue or return</p>
+                  <h2>Store Movement</h2>
+                </div>
+              </div>
+              <form id="storeMovementForm" class="compact-form">
+                <select name="stockId" required></select>
+                <select name="type"><option>Issue</option><option>Return</option><option>Adjustment</option></select>
+                <input name="quantity" type="number" min="1" placeholder="Quantity" required>
+                <input name="receiver" placeholder="Receiver / reason" required>
+                <button class="primary-btn">Post Movement</button>
+              </form>
+              <div id="storeMovementList" class="records-list"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="page" data-page-panel="workflows">
+          <div class="workflow-grid">
+            <article class="panel">
+              <div class="panel-header"><div><p class="eyebrow">Controlled transfer</p><h2>Asset Movement</h2></div></div>
+              <form id="transferForm" class="compact-form">
+                <select name="assetId" required></select>
+                <input name="newCampus" placeholder="New campus" required>
+                <input name="newLocation" placeholder="New building / room" required>
+                <input name="newCustodian" placeholder="New custodian" required>
+                <input name="reason" placeholder="Transfer reason" required>
+                <button class="primary-btn">Request Transfer</button>
+              </form>
+            </article>
+            <article class="panel">
+              <div class="panel-header"><div><p class="eyebrow">Repair</p><h2>Maintenance / Warranty</h2></div></div>
+              <form id="maintenanceForm" class="compact-form">
+                <select name="assetId" required></select>
+                <input name="ticket" placeholder="Service Desk ticket" required>
+                <input name="fault" placeholder="Fault / warranty claim" required>
+                <select name="status"><option>Fault Reported</option><option>Warranty Claim</option><option>Vendor Repair</option><option>Returned</option><option>Replace</option></select>
+                <button class="primary-btn">Log Repair</button>
+              </form>
+            </article>
+            <article class="panel">
+              <div class="panel-header"><div><p class="eyebrow">Disposal</p><h2>Write-Off Approval</h2></div></div>
+              <form id="disposalForm" class="compact-form">
+                <select name="assetId" required></select>
+                <input name="reason" placeholder="Disposal reason" required>
+                <input name="method" placeholder="Method / certificate reference" required>
+                <select name="approval"><option>Pending IT Manager</option><option>Pending Finance</option><option>Pending Committee</option><option>Approved</option></select>
+                <button class="primary-btn">Submit Disposal</button>
+              </form>
+            </article>
+          </div>
+          <article class="panel">
+            <div class="panel-header"><div><p class="eyebrow">Approval queue</p><h2>Workflow History</h2></div></div>
+            <div id="workflowList" class="records-list"></div>
+          </article>
+        </section>
+
+        <section class="page" data-page-panel="audit">
+          <div class="module-grid">
+            <article class="panel">
+              <div class="panel-header"><div><p class="eyebrow">Stocktake</p><h2>Audit Scan</h2></div></div>
+              <form id="auditForm" class="compact-form">
+                <input name="tag" placeholder="Scan / enter asset tag" required>
+                <select name="result"><option>Verified</option><option>Missing</option><option>Damaged</option><option>Relocated</option><option>Unknown</option></select>
+                <input name="auditor" placeholder="Auditor name" required>
+                <input name="notes" placeholder="Notes / photo reference">
+                <button class="primary-btn">Save Audit Result</button>
+              </form>
+              <div id="auditList" class="records-list"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-header"><div><p class="eyebrow">Exceptions</p><h2>Audit Dashboard</h2></div></div>
+              <div id="auditCards" class="summary-grid"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="page" data-page-panel="licences">
+          <div class="module-grid">
+            <article class="panel">
+              <div class="panel-header"><div><p class="eyebrow">Compliance</p><h2>Software Licence Register</h2></div></div>
+              <form id="licenceForm" class="compact-form">
+                <input name="name" placeholder="Software name" required>
+                <input name="vendor" placeholder="Vendor" required>
+                <input name="purchased" type="number" min="0" placeholder="Purchased" required>
+                <input name="assigned" type="number" min="0" placeholder="Assigned" required>
+                <input name="expiry" type="date" required>
+                <button class="primary-btn">Save Licence</button>
+              </form>
+              <div id="licenceList" class="records-list"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-header"><div><p class="eyebrow">Entitlement</p><h2>Compliance Summary</h2></div></div>
+              <div id="licenceBars" class="licence-bars"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="page" data-page-panel="reports">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Management and audit</p>
+                <h2>Reports</h2>
+              </div>
+              <div class="topbar-actions">
+                <button id="exportAssetsBtn" class="secondary-btn">Export Assets CSV</button>
+                <button id="exportAuditBtn" class="secondary-btn">Export Audit CSV</button>
+                <button id="printBtn" class="primary-btn">Print / PDF</button>
+              </div>
+            </div>
+            <div id="reportGrid" class="report-grid"></div>
+          </div>
+        </section>
+
+        <section class="page" data-page-panel="admin">
+          <div class="module-grid">
+            <article class="panel">
+              <div class="panel-header"><div><p class="eyebrow">Security</p><h2>Roles and Access Control</h2></div></div>
+              <div id="roleGrid" class="role-grid"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-header"><div><p class="eyebrow">Governance</p><h2>Audit Trail and Validation</h2></div></div>
+              <div id="systemLog" class="records-list"></div>
+            </article>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div><p class="eyebrow">System controls</p><h2>Local System Data</h2></div></div>
+            <div class="button-row">
+              <button id="resetDemoBtn" class="secondary-btn">Reset Demo Data</button>
+              <button id="downloadBackupBtn" class="primary-btn">Download JSON Backup</button>
+            </div>
+            <p class="help-text">This version stores records in this browser using localStorage. For production, connect the same modules to a server database, SSO, file storage, and integration APIs.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="script.js"></script>
+  </body>
+</html>
